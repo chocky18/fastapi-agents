@@ -8,7 +8,9 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    env:
+      SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
