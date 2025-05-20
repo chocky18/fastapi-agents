@@ -1,0 +1,30 @@
+name: Deploy FastAPI to EC2
+
+on:
+  push:
+    branches:
+      - master  # or 'main' depending on your default branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: SSH into EC2 and deploy
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ubuntu
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          sudo apt update
+          cd fastapi-agents || git clone https://github.com/${{ github.repository }} && cd fastapi-agents
+          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" > .env
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+          pkill -f uvicorn || true
+          nohup uvicorn fastapi_test:app --host 0.0.0.0 --port 8000 &
